@@ -67,6 +67,10 @@ func openPort(name string, baud int) (rwc io.ReadWriteCloser, err error) {
 		return nil, err
 	}
 
+	// Read is satisfied as soon as a single byte is received or the read timer expires
+	st.c_cc[C.VMIN] = 0
+	st.c_cc[C.VTIME] = 1
+
 	// Select local mode
 	st.c_cflag |= (C.CLOCAL | C.CREAD)
 
