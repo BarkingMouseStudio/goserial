@@ -67,7 +67,7 @@ func openPort(name string, baud int) (rwc io.ReadWriteCloser, err error) {
 		return nil, err
 	}
 
-	// Read is satisfied as soon as a single byte is received or the read timer expires
+	// Reads at least one byte or returns (non-blocking)
 	st.c_cc[C.VMIN] = 0
 	st.c_cc[C.VTIME] = 1
 
@@ -84,7 +84,6 @@ func openPort(name string, baud int) (rwc io.ReadWriteCloser, err error) {
 		return nil, err
 	}
 
-	//fmt.Println("Tweaking", name)
 	r1, _, e := syscall.Syscall(syscall.SYS_FCNTL,
 		uintptr(f.Fd()),
 		uintptr(syscall.F_SETFL),
@@ -94,18 +93,6 @@ func openPort(name string, baud int) (rwc io.ReadWriteCloser, err error) {
 		f.Close()
 		return nil, errors.New(s)
 	}
-
-	/*
-				r1, _, e = syscall.Syscall(syscall.SYS_IOCTL,
-			                uintptr(f.Fd()),
-			                uintptr(0x80045402), // IOSSIOSPEED
-			                uintptr(unsafe.Pointer(&baud)));
-			        if e != 0 || r1 != 0 {
-			                s := fmt.Sprint("Baudrate syscall error:", e, r1)
-					f.Close()
-		                        return nil, os.NewError(s)
-				}
-	*/
 
 	return f, nil
 }
